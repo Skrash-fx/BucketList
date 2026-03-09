@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36915.13
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BucketListAPI", "BucketListAPI\BucketListAPI.csproj", "{9AC7FD98-557E-4D0D-A050-BD9603977A04}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BucketListFrontEnd", "BucketListFrontEnd\BucketListFrontEnd.csproj", "{4F083652-1F00-4F45-A84B-7134218297E2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9AC7FD98-557E-4D0D-A050-BD9603977A04}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9AC7FD98-557E-4D0D-A050-BD9603977A04}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9AC7FD98-557E-4D0D-A050-BD9603977A04}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9AC7FD98-557E-4D0D-A050-BD9603977A04}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F083652-1F00-4F45-A84B-7134218297E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F083652-1F00-4F45-A84B-7134218297E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F083652-1F00-4F45-A84B-7134218297E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F083652-1F00-4F45-A84B-7134218297E2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {971354C7-5B21-4B0C-8CAE-84843C9A3A83}
+	EndGlobalSection
+EndGlobal
