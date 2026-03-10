@@ -1,0 +1,15 @@
+﻿@page "/test"
+@rendermode InteractiveServer
+
+<h3>Test</h3>
+<button @onclick="TestClick">Klik mij</button>
+<p>@message</p>
+
+@code {
+    private string message = "";
+
+    private void TestClick()
+    {
+        message = "Het werkt!";
+    }
+}
