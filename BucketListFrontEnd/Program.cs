@@ -1,12 +1,12 @@
+
 using BucketListFrontEnd.Components;
 
 var builder = WebApplication.CreateBuilder(args);
-
 builder.Services.AddScoped(sp => new HttpClient
 {
-
-    BaseAddress = new Uri("https://localhost:7192/") // vervang XXXX door je API poort
+    BaseAddress = new Uri("https://localhost:7192/")
 });
+
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();

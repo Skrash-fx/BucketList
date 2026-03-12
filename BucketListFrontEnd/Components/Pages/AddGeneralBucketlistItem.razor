@@ -4,43 +4,44 @@
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
 
+<div style="max-width: 1000px; margin: 0 auto; padding: 40px 20px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 15px; border-bottom: 2px solid #e0e0e0;">
+        <h3 style="font-size: 32px; font-weight: bold; margin: 0;">Voeg een nieuw item toe 🪣</h3>
+    </div>
 
-<h3>Voeg item toe</h3>
-<div class ="mb-3 mt-3">
-    <label for="onderwerpt"> Onderwerp</label
-    <input type="text" class="form-control" id="name" placeholder="onderwerp" name="onderwerp" @bind="_aName">
-</div>
+    <div class="mb-3 mt-3">
+        <label for="onderwerp">Onderwerp: </label>
+        <input type="text" class="form-control" id="name" placeholder="onderwerp" name="onderwerp" @bind="nameBucketListItem" />
+    </div>
 
-<div class ="mb-3">
-    <label for="verduidelijking"> Beschrijving</label
-    <input type="text" class="form-control" id="pwd" placeholder="Verduidelijking" name="verduidelijking" @bind="_aDescription">
+    <div class="mb-3">
+        <label for="verduidelijking">Beschrijving: </label>
+        <input type="text" class="form-control" id="pwd" placeholder="Verduidelijking" name="verduidelijking" @bind="descriptionBucketListItem" />
+    </div>
+    <button type="submit" class="btn btn-primary" @onclick="addItemToDB">
+        Voeg Toe
+    </button>
 </div>
-<button type="Submit" class="btn btn-primary" @onclick="addItemToDB">Voeg toe</button>
 
 @code {
-    private string _aName, _aDescription;
+    private string nameBucketListItem, descriptionBucketListItem;
+
     private async void addItemToDB()
     {
-        var url = $"bucketlistitem?itemName={Uri.EscapeDataString(_aName)}&itemDescription={Uri.EscapeDataString(_aDescription)}";
-        //post request, lege bod
+        var url = $"bucketlistitem?itemName={Uri.EscapeDataString(nameBucketListItem)}&itemDescription={Uri.EscapeDataString(descriptionBucketListItem)}";
         var response = await Http.PostAsync(url, null);
 
-        if(response.IsSuccessStatusCode)
+        if (response.IsSuccessStatusCode)
         {
-            //navigeer naar bucketlist pagine bij succes
-            Navigation.NavigateTo("/Bucketlistitem");
+            Navigation.NavigateTo("/bucketlistitem");
         }
         else if(response.StatusCode == System.Net.HttpStatusCode.Conflict)
         {
-            //item bestaat al
-            await JS.InvokeVoidAsync("alert", "dit item bestaat al!");
-
+            await JS.InvokeVoidAsync("alert", "Dit item bestaat al!");
         }
         else
         {
-            //andere fout
-            await JS.InvokeVoidAsync("Alert", "er trad een onbekende fout op!");
+            await JS.InvokeVoidAsync("alert", "Er trad een onbekende fout op!");
         }
     }
-
 }
