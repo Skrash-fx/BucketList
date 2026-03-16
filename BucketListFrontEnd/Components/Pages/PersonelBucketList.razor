@@ -4,51 +4,387 @@
 @inject IJSRuntime JS
 @rendermode InteractiveServer
 
-<div style="max-width: 1000px; margin: 0 auto; padding: 40px 20px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 15px; border-bottom: 2px solid #e0e0e0;">
-        <h3 style="font-size: 32px; font-weight: bold; margin: 0;">Mijn Bucket List 🪣</h3>
-        @if (!string.IsNullOrEmpty(userName))
-        {
-            <span style="color: #666; font-weight: 500;">👤 @userName</span>
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400&display=swap');
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-bottom: 40px;
+        padding-right: 72px;
+    }
+
+    .page-title {
+        font-size: 38px;
+        font-weight: 800;
+        color: #fff;
+        letter-spacing: -1px;
+        line-height: 1;
+    }
+
+    .page-subtitle {
+        color: rgba(255,255,255,0.35);
+        font-size: 14px;
+        margin-top: 6px;
+        font-family: 'DM Mono', monospace;
+    }
+
+    .stats {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 36px;
+        flex-wrap: wrap;
+    }
+
+    .stat-box {
+        padding: 14px 20px;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 12px;
+    }
+
+    .stat-num {
+        font-size: 24px;
+        font-weight: 800;
+        color: #fff;
+        font-family: 'Syne', sans-serif;
+    }
+
+    .stat-label {
+        font-size: 11px;
+        color: rgba(255,255,255,0.3);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-top: 2px;
+        font-family: 'DM Mono', monospace;
+    }
+
+    /* Add form */
+    .add-section {
+        margin-bottom: 40px;
+    }
+
+    .add-toggle {
+        padding: 11px 20px;
+        background: linear-gradient(135deg, #7c3aed, #5b21b6);
+        border: none;
+        border-radius: 10px;
+        color: #fff;
+        font-family: 'Syne', sans-serif;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: opacity 0.2s;
+    }
+
+        .add-toggle:hover {
+            opacity: 0.85;
         }
+
+    .add-form {
+        margin-top: 16px;
+        padding: 24px;
+        background: rgba(124, 58, 237, 0.06);
+        border: 1px solid rgba(124, 58, 237, 0.2);
+        border-radius: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+        .add-form label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.35);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            font-family: 'DM Mono', monospace;
+        }
+
+        .add-form input {
+            width: 100%;
+            padding: 12px 14px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 9px;
+            color: #fff;
+            font-family: 'Syne', sans-serif;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+            box-sizing: border-box;
+        }
+
+            .add-form input::placeholder {
+                color: rgba(255,255,255,0.18);
+            }
+
+            .add-form input:focus {
+                border-color: rgba(124, 58, 237, 0.5);
+                background: rgba(255,255,255,0.07);
+            }
+
+    .form-row {
+        display: flex;
+        gap: 12px;
+    }
+
+        .form-row .form-field {
+            flex: 1;
+        }
+
+    .btn-submit {
+        padding: 12px 24px;
+        background: linear-gradient(135deg, #7c3aed, #5b21b6);
+        border: none;
+        border-radius: 9px;
+        color: #fff;
+        font-family: 'Syne', sans-serif;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: opacity 0.2s;
+        align-self: flex-start;
+    }
+
+        .btn-submit:hover:not(:disabled) {
+            opacity: 0.85;
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+    .alert-msg {
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-family: 'DM Mono', monospace;
+    }
+
+    .alert-error {
+        background: rgba(220, 53, 69, 0.1);
+        border: 1px solid rgba(220, 53, 69, 0.25);
+        color: #f87171;
+    }
+
+    .alert-success {
+        background: rgba(74, 222, 128, 0.08);
+        border: 1px solid rgba(74, 222, 128, 0.2);
+        color: #4ade80;
+    }
+
+    /* Items */
+    .item-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 18px;
+    }
+
+    .item-card {
+        padding: 24px;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 14px;
+        transition: border-color 0.2s;
+    }
+
+        .item-card.done {
+            background: rgba(74, 222, 128, 0.03);
+            border-color: rgba(74, 222, 128, 0.12);
+        }
+
+    .item-name {
+        font-size: 17px;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 8px;
+        line-height: 1.3;
+    }
+
+        .item-name.done {
+            color: rgba(255,255,255,0.35);
+            text-decoration: line-through;
+            text-decoration-color: rgba(255,255,255,0.15);
+        }
+
+    .item-desc {
+        color: rgba(255,255,255,0.35);
+        font-size: 13px;
+        line-height: 1.6;
+        font-family: 'DM Mono', monospace;
+        margin-bottom: 20px;
+    }
+
+    .toggle-btn {
+        width: 100%;
+        padding: 10px 14px;
+        border-radius: 9px;
+        font-family: 'Syne', sans-serif;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        border: none;
+        transition: opacity 0.2s, transform 0.15s;
+    }
+
+        .toggle-btn:hover:not(:disabled) {
+            opacity: 0.85;
+            transform: translateY(-1px);
+        }
+
+        .toggle-btn.mark-done {
+            background: linear-gradient(135deg, #16a34a, #15803d);
+            color: #fff;
+        }
+
+        .toggle-btn.mark-undone {
+            background: rgba(255,255,255,0.06);
+            color: rgba(255,255,255,0.45);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .toggle-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+    .empty-state {
+        text-align: center;
+        padding: 80px 20px;
+        color: rgba(255,255,255,0.2);
+        font-family: 'DM Mono', monospace;
+        font-size: 14px;
+    }
+</style>
+
+<div style="max-width: 1100px; margin: 0 auto; padding: 52px 28px;">
+
+    <div class="page-header">
+        <div>
+            <div class="page-title">⭐ Mijn lijst</div>
+            @if (!string.IsNullOrEmpty(userName))
+            {
+                <div class="page-subtitle">@userName's bucket list</div>
+            }
+        </div>
     </div>
 
     @if (!isLoaded)
     {
-        <p style="text-align: center; padding: 60px 20px; color: #999;">Laden...</p>
-    }
-    else if (items == null || !items.Any())
-    {
-        <p style="text-align: center; padding: 60px 20px; color: #999;">Geen items gevonden in jouw bucket list!</p>
+        <div class="empty-state">laden...</div>
     }
     else
     {
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 20px;">
-            @foreach (var item in items)
+        <!-- Stats -->
+        @if (items != null && items.Any())
+        {
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="stat-num">@items.Count</div>
+                    <div class="stat-label">Totaal</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-num" style="color: #4ade80;">@items.Count(i => i.Executed)</div>
+                    <div class="stat-label">Gedaan</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-num" style="color: #facc15;">@items.Count(i => !i.Executed)</div>
+                    <div class="stat-label">Te doen</div>
+                </div>
+            </div>
+        }
+
+        <!-- Add item section -->
+        <div class="add-section">
+            <button class="add-toggle" @onclick="() => showForm = !showForm">
+                @(showForm ? "✕ Annuleren" : "+ Nieuw item toevoegen")
+            </button>
+
+            @if (showForm)
             {
-                <div style="padding: 24px; background: white; border: 1px solid #e0e0e0; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
-                        <h4 style="font-size: 20px; font-weight: 600; color: #2c3e50; margin: 0;">@item.Name</h4>
-                        @if (item.Executed)
-                        {
-                            <span style="background: #d4edda; color: #155724; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;">✅ Gedaan</span>
-                        }
-                        else
-                        {
-                            <span style="background: #fff3cd; color: #856404; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;">⏳ Nog te doen</span>
-                        }
+                <div class="add-form">
+                    @if (!string.IsNullOrEmpty(formError))
+                    {
+                        <div class="alert-msg alert-error">@formError</div>
+                    }
+                    @if (!string.IsNullOrEmpty(formSuccess))
+                    {
+                        <div class="alert-msg alert-success">@formSuccess</div>
+                    }
+
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label>Naam</label>
+                            <input type="text" placeholder="bv. Kilimanjaro beklimmen" @bind="newName" />
+                        </div>
+                        <div class="form-field">
+                            <label>Beschrijving</label>
+                            <input type="text" placeholder="korte omschrijving..." @bind="newDescription" />
+                        </div>
                     </div>
-                    <p style="color: #666; line-height: 1.6;">@item.Description</p>
+
+                    <button class="btn-submit" @onclick="AddItem" disabled="@isSubmitting">
+                        @(isSubmitting ? "Bezig..." : "Toevoegen →")
+                    </button>
                 </div>
             }
         </div>
+
+        <!-- List -->
+        @if (items == null || !items.Any())
+        {
+            <div class="empty-state">nog geen items — maak je eerste aan hierboven</div>
+        }
+        else
+        {
+            <div class="item-grid">
+                @foreach (var item in items)
+                {
+                    <div class="item-card @(item.Executed ? "done" : "")">
+                        <div class="item-name @(item.Executed ? "done" : "")">@item.Name</div>
+                        <div class="item-desc">@item.Description</div>
+
+                        <button class="toggle-btn @(item.Executed ? "mark-undone" : "mark-done")"
+                                @onclick="() => ToggleItem(item)"
+                                disabled="@togglingIds.Contains(item.ItemId)">
+                            @if (togglingIds.Contains(item.ItemId))
+                            {
+                                <span>...</span>
+                            }
+                            else if (item.Executed)
+                            {
+                                <span>↩ Toch nog niet gedaan</span>
+                            }
+                            else
+                            {
+                                <span>✓ Markeer als gedaan</span>
+                            }
+                        </button>
+                    </div>
+                }
+            </div>
+        }
     }
 </div>
 
 @code {
     private List<BucketListItem>? items;
     private string userName = "";
+    private int userId;
     private bool isLoaded = false;
+    private HashSet<int> togglingIds = new();
+
+    private bool showForm = false;
+    private string newName = "";
+    private string newDescription = "";
+    private string formError = "";
+    private string formSuccess = "";
+    private bool isSubmitting = false;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -63,17 +399,96 @@
             }
 
             userName = await JS.InvokeAsync<string>("sessionStorage.getItem", "userName") ?? "";
-
-            var userId = int.Parse(userIdStr);
-            await LoadItems(userId);
+            userId = int.Parse(userIdStr);
+            await LoadItems();
             isLoaded = true;
             StateHasChanged();
         }
     }
 
-    private async Task LoadItems(int userId)
+    private async Task LoadItems()
     {
         items = await Http.GetFromJsonAsync<List<BucketListItem>>($"users/{userId}/bucketlist");
+    }
+
+    private async Task AddItem()
+    {
+        formError = "";
+        formSuccess = "";
+
+        if (string.IsNullOrWhiteSpace(newName))
+        {
+            formError = "Geef een naam op.";
+            return;
+        }
+
+        isSubmitting = true;
+        StateHasChanged();
+
+        try
+        {
+            // Stap 1: item aanmaken in globale lijst
+            var createUrl = $"bucketlistitem?itemName={Uri.EscapeDataString(newName)}&itemDescription={Uri.EscapeDataString(newDescription)}";
+            var createResponse = await Http.PostAsync(createUrl, null);
+
+            if (!createResponse.IsSuccessStatusCode && createResponse.StatusCode != System.Net.HttpStatusCode.Conflict)
+            {
+                formError = "Fout bij aanmaken van item.";
+                return;
+            }
+
+            // Stap 2: item id ophalen uit globale lijst
+            var allItems = await Http.GetFromJsonAsync<List<GlobalItem>>("bucketlistitems");
+            var match = allItems?.FirstOrDefault(i => i.Name.Equals(newName.Trim(), StringComparison.OrdinalIgnoreCase));
+
+            if (match == null)
+            {
+                formError = "Item niet gevonden na aanmaken.";
+                return;
+            }
+
+            // Stap 3: toevoegen aan persoonlijke lijst
+            var addResponse = await Http.PostAsync($"users/{userId}/bucketlist/{match.ItemId}", null);
+
+            if (addResponse.IsSuccessStatusCode)
+            {
+                formSuccess = $"✅ '{newName}' toegevoegd aan jouw lijst én de globale lijst!";
+                newName = "";
+                newDescription = "";
+                await LoadItems();
+            }
+            else if (addResponse.StatusCode == System.Net.HttpStatusCode.Conflict)
+            {
+                formError = "Dit item staat al in jouw lijst.";
+            }
+            else
+            {
+                formError = "Fout bij toevoegen aan jouw lijst.";
+            }
+        }
+        catch
+        {
+            formError = "Kan geen verbinding maken met de server.";
+        }
+        finally
+        {
+            isSubmitting = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task ToggleItem(BucketListItem item)
+    {
+        togglingIds.Add(item.ItemId);
+        StateHasChanged();
+
+        var response = await Http.PutAsync($"users/{userId}/bucketlist/{item.ItemId}/toggle", null);
+
+        if (response.IsSuccessStatusCode)
+            item.Executed = !item.Executed;
+
+        togglingIds.Remove(item.ItemId);
+        StateHasChanged();
     }
 
     public class BucketListItem
@@ -82,5 +497,11 @@
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public bool Executed { get; set; }
+    }
+
+    public class GlobalItem
+    {
+        public int ItemId { get; set; }
+        public string Name { get; set; } = string.Empty;
     }
 }

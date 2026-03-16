@@ -1,18 +1,49 @@
 ﻿@inherits LayoutComponentBase
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+@rendermode InteractiveServer
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+<div class="app-shell">
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+    <button class="hamburger" @onclick="ToggleMenu">
+        <span class="bar @(menuOpen ? "open" : "")"></span>
+        <span class="bar @(menuOpen ? "open" : "")"></span>
+        <span class="bar @(menuOpen ? "open" : "")"></span>
+    </button>
+
+    @if (menuOpen)
+    {
+        <div class="overlay" @onclick="CloseMenu"></div>
+    }
+
+    <nav class="sidenav @(menuOpen ? "open" : "")">
+        <div class="sidenav-header">
+            <span class="brand-icon">🪣</span>
+            <span class="brand-name">BucketList</span>
+            <button class="close-btn" @onclick="CloseMenu">✕</button>
         </div>
 
-        <article class="content px-4">
-            @Body
-        </article>
+        <div class="sidenav-links">
+            <a class="nav-link" href="/" @onclick="CloseMenu">
+                <span class="nav-icon">🏠</span> Home
+            </a>
+            <a class="nav-link" href="/mijnlijst" @onclick="CloseMenu">
+                <span class="nav-icon">📖</span> Mijn lijst
+            </a>
+            <a class="nav-link" href="/login" @onclick="CloseMenu">
+                <span class="nav-icon">🗝️</span> Login
+            </a>
+        </div>
+
+        <div class="sidenav-footer">
+            <button class="logout-btn" @onclick="Logout">
+                ➜] Uitloggen
+            </button>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        @Body
     </main>
 </div>
 
@@ -21,3 +52,252 @@
     <a href="" class="reload">Reload</a>
     <a class="dismiss">🗙</a>
 </div>
+
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400&display=swap');
+
+    *, *::before, *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    html, body {
+        background: #0a0a0f;
+        color: #e8e8f0;
+        font-family: 'Syne', sans-serif;
+        min-height: 100vh;
+    }
+
+    .app-shell {
+        min-height: 100vh;
+        background: #0a0a0f;
+        background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(102, 51, 153, 0.18), transparent), radial-gradient(ellipse 50% 40% at 90% 90%, rgba(51, 0, 102, 0.1), transparent);
+        position: relative;
+    }
+
+    .hamburger {
+        position: fixed;
+        top: 20px;
+        right: 24px;
+        z-index: 1000;
+        width: 44px;
+        height: 44px;
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 10px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 5px;
+        cursor: pointer;
+        backdrop-filter: blur(10px);
+        transition: background 0.2s;
+    }
+
+        .hamburger:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+    .bar {
+        display: block;
+        width: 20px;
+        height: 2px;
+        background: rgba(255,255,255,0.8);
+        border-radius: 2px;
+        transition: all 0.25s ease;
+        transform-origin: center;
+    }
+
+        .bar.open:nth-child(1) {
+            transform: translateY(7px) rotate(45deg);
+        }
+
+        .bar.open:nth-child(2) {
+            opacity: 0;
+            transform: scaleX(0);
+        }
+
+        .bar.open:nth-child(3) {
+            transform: translateY(-7px) rotate(-45deg);
+        }
+
+    .overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.6);
+        z-index: 900;
+        backdrop-filter: blur(2px);
+        animation: fadeIn 0.2s ease;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    .sidenav {
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 280px;
+        height: 100vh;
+        z-index: 950;
+        background: rgba(14, 14, 22, 0.97);
+        border-left: 1px solid rgba(255,255,255,0.07);
+        backdrop-filter: blur(24px);
+        transform: translateX(100%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+        box-shadow: -20px 0 60px rgba(0,0,0,0.5);
+    }
+
+        .sidenav.open {
+            transform: translateX(0);
+        }
+
+    .sidenav-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 28px 24px 24px;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .brand-icon {
+        font-size: 22px;
+    }
+
+    .brand-name {
+        font-size: 18px;
+        font-weight: 800;
+        color: #fff;
+        letter-spacing: -0.4px;
+        flex: 1;
+    }
+
+    .close-btn {
+        background: none;
+        border: none;
+        color: rgba(255,255,255,0.35);
+        font-size: 16px;
+        cursor: pointer;
+        padding: 4px;
+        line-height: 1;
+        transition: color 0.2s;
+    }
+
+        .close-btn:hover {
+            color: rgba(255,255,255,0.7);
+        }
+
+    .sidenav-links {
+        flex: 1;
+        padding: 20px 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .nav-link {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 14px;
+        border-radius: 10px;
+        color: rgba(255,255,255,0.55);
+        text-decoration: none;
+        font-size: 15px;
+        font-weight: 600;
+        transition: background 0.15s, color 0.15s;
+    }
+
+        .nav-link:hover {
+            background: rgba(255,255,255,0.06);
+            color: rgba(255,255,255,0.9);
+        }
+
+    .nav-icon {
+        font-size: 17px;
+        width: 24px;
+        text-align: center;
+    }
+
+    .sidenav-footer {
+        padding: 20px 16px 32px;
+        border-top: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .logout-btn {
+        width: 100%;
+        padding: 11px 14px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 10px;
+        color: rgba(255,255,255,0.45);
+        font-family: 'Syne', sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        text-align: left;
+        transition: background 0.2s, color 0.2s;
+    }
+
+        .logout-btn:hover {
+            background: rgba(220, 53, 69, 0.12);
+            border-color: rgba(220, 53, 69, 0.25);
+            color: #f87171;
+        }
+
+    .main-content {
+        min-height: 100vh;
+    }
+
+    h1, h2, h3, h4 {
+        font-family: 'Syne', sans-serif;
+    }
+
+    #blazor-error-ui {
+        background: rgba(220, 53, 69, 0.15);
+        border-top: 1px solid rgba(220, 53, 69, 0.3);
+        bottom: 0;
+        display: none;
+        left: 0;
+        padding: 0.8rem 1.25rem;
+        position: fixed;
+        width: 100%;
+        z-index: 2000;
+        color: #f87171;
+        font-family: 'DM Mono', monospace;
+        font-size: 13px;
+    }
+
+        #blazor-error-ui .dismiss {
+            cursor: pointer;
+            position: absolute;
+            right: 0.75rem;
+            top: 0.5rem;
+        }
+</style>
+
+@code {
+    private bool menuOpen = false;
+
+    private void ToggleMenu() => menuOpen = !menuOpen;
+    private void CloseMenu() => menuOpen = false;
+
+    private async Task Logout()
+    {
+        await JS.InvokeVoidAsync("sessionStorage.removeItem", "userId");
+        await JS.InvokeVoidAsync("sessionStorage.removeItem", "userName");
+        menuOpen = false;
+        Navigation.NavigateTo("/login", forceLoad: true);
+    }
+}

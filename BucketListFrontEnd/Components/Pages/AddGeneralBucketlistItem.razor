@@ -4,27 +4,111 @@
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
 
-<div style="max-width: 1000px; margin: 0 auto; padding: 40px 20px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 15px; border-bottom: 2px solid #e0e0e0;">
-        <h3 style="font-size: 32px; font-weight: bold; margin: 0;">Voeg een nieuw item toe 🪣</h3>
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400&display=swap');
+
+    .add-wrapper {
+        max-width: 540px;
+        margin: 0 auto;
+        padding: 52px 28px;
+    }
+
+    .page-title {
+        font-size: 34px;
+        font-weight: 800;
+        color: #fff;
+        letter-spacing: -1px;
+        margin-bottom: 8px;
+        padding-right: 60px;
+    }
+
+    .page-subtitle {
+        color: rgba(255,255,255,0.3);
+        font-size: 13px;
+        font-family: 'DM Mono', monospace;
+        margin-bottom: 40px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+        .form-group label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.35);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            font-family: 'DM Mono', monospace;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 13px 16px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+            color: #fff;
+            font-family: 'Syne', sans-serif;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+            .form-group input::placeholder {
+                color: rgba(255,255,255,0.18);
+            }
+
+            .form-group input:focus {
+                border-color: rgba(124, 58, 237, 0.5);
+                background: rgba(255,255,255,0.07);
+            }
+
+    .btn-submit {
+        width: 100%;
+        padding: 14px;
+        margin-top: 8px;
+        background: linear-gradient(135deg, #7c3aed, #5b21b6);
+        border: none;
+        border-radius: 10px;
+        color: #fff;
+        font-family: 'Syne', sans-serif;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: opacity 0.2s, transform 0.15s;
+    }
+
+        .btn-submit:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+</style>
+
+<div class="add-wrapper">
+    <div class="page-title">➕ Nieuw item</div>
+    <div class="page-subtitle">voeg een item toe aan de globale lijst</div>
+
+    <div class="form-group">
+        <label>Onderwerp</label>
+        <input type="text" placeholder="bv. Kilimanjaro beklimmen" @bind="nameBucketListItem" />
     </div>
 
-    <div class="mb-3 mt-3">
-        <label for="onderwerp">Onderwerp: </label>
-        <input type="text" class="form-control" id="name" placeholder="onderwerp" name="onderwerp" @bind="nameBucketListItem" />
+    <div class="form-group">
+        <label>Beschrijving</label>
+        <input type="text" placeholder="een korte omschrijving..." @bind="descriptionBucketListItem" />
     </div>
 
-    <div class="mb-3">
-        <label for="verduidelijking">Beschrijving: </label>
-        <input type="text" class="form-control" id="pwd" placeholder="Verduidelijking" name="verduidelijking" @bind="descriptionBucketListItem" />
-    </div>
-    <button type="submit" class="btn btn-primary" @onclick="addItemToDB">
-        Voeg Toe
+    <button class="btn-submit" @onclick="addItemToDB">
+        Item toevoegen →
     </button>
 </div>
 
 @code {
-    private string nameBucketListItem, descriptionBucketListItem;
+    private string nameBucketListItem = "";
+    private string descriptionBucketListItem = "";
 
     private async void addItemToDB()
     {
@@ -35,7 +119,7 @@
         {
             Navigation.NavigateTo("/bucketlistitem");
         }
-        else if(response.StatusCode == System.Net.HttpStatusCode.Conflict)
+        else if (response.StatusCode == System.Net.HttpStatusCode.Conflict)
         {
             await JS.InvokeVoidAsync("alert", "Dit item bestaat al!");
         }

@@ -1,7 +1,293 @@
 ﻿@page "/"
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+@rendermode InteractiveServer
 
-<PageTitle>Home</PageTitle>
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400&display=swap');
 
-<h1>Hello, world!</h1>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-bottom: 40px;
+        padding-right: 72px;
+    }
 
-Welcome to your new app.
+    .page-title {
+        font-size: 38px;
+        font-weight: 800;
+        color: #fff;
+        letter-spacing: -1px;
+        line-height: 1;
+    }
+
+    .page-subtitle {
+        color: rgba(255,255,255,0.35);
+        font-size: 14px;
+        margin-top: 6px;
+        font-family: 'DM Mono', monospace;
+    }
+
+    .item-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 18px;
+    }
+
+    .item-card {
+        padding: 24px;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 14px;
+        transition: border-color 0.2s, background 0.2s;
+    }
+
+        .item-card:hover {
+            background: rgba(255,255,255,0.05);
+            border-color: rgba(255,255,255,0.12);
+        }
+
+    .item-name {
+        font-size: 17px;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 8px;
+    }
+
+    .item-desc {
+        color: rgba(255,255,255,0.4);
+        font-size: 13px;
+        line-height: 1.6;
+        font-family: 'DM Mono', monospace;
+        margin-bottom: 18px;
+    }
+
+    .btn-add {
+        padding: 8px 16px;
+        background: linear-gradient(135deg, #7c3aed, #5b21b6);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 13px;
+        font-family: 'Syne', sans-serif;
+        transition: opacity 0.2s;
+    }
+
+        .btn-add:hover {
+            opacity: 0.85;
+        }
+
+    .btn-lock {
+        padding: 8px 16px;
+        background: rgba(255,255,255,0.05);
+        color: rgba(255,255,255,0.35);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 13px;
+        font-family: 'Syne', sans-serif;
+        transition: background 0.2s, color 0.2s;
+    }
+
+        .btn-lock:hover {
+            background: rgba(124, 58, 237, 0.15);
+            border-color: rgba(124, 58, 237, 0.3);
+            color: rgba(255,255,255,0.7);
+        }
+
+    .feedback {
+        font-size: 12px;
+        font-family: 'DM Mono', monospace;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 100px 20px;
+        color: rgba(255,255,255,0.2);
+        font-family: 'DM Mono', monospace;
+        font-size: 14px;
+    }
+
+    .user-badge {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .user-name {
+        color: rgba(255,255,255,0.4);
+        font-size: 13px;
+        font-family: 'DM Mono', monospace;
+    }
+
+    .btn-logout {
+        padding: 7px 14px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 8px;
+        color: rgba(255,255,255,0.35);
+        font-family: 'Syne', sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s, color 0.2s;
+    }
+
+        .btn-logout:hover {
+            background: rgba(220, 53, 69, 0.12);
+            border-color: rgba(220, 53, 69, 0.25);
+            color: #f87171;
+        }
+
+    .btn-login-top {
+        padding: 8px 18px;
+        background: linear-gradient(135deg, #7c3aed, #5b21b6);
+        color: white;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 13px;
+        font-family: 'Syne', sans-serif;
+        text-decoration: none;
+        transition: opacity 0.2s;
+        display: inline-block;
+    }
+
+        .btn-login-top:hover {
+            opacity: 0.85;
+        }
+</style>
+
+<div style="max-width: 1100px; margin: 0 auto; padding: 52px 28px;">
+
+    <div class="page-header">
+        <div>
+            <div class="page-title">📂 BucketList</div>
+            <div class="page-subtitle">alle activiteiten om ooit te doen</div>
+        </div>
+
+        @if (isLoaded)
+        {
+            @if (!string.IsNullOrEmpty(userName))
+            {
+                <div class="user-badge">
+                    <span class="user-name">@userName</span>
+                    <button class="btn-logout" @onclick="Logout">Uitloggen</button>
+                </div>
+            }
+            else
+            {
+                <a href="/login" class="btn-login-top">Inloggen →</a>
+            }
+        }
+    </div>
+
+    @if (items == null)
+    {
+        <div class="empty-state">laden...</div>
+    }
+    else if (!items.Any())
+    {
+        <div class="empty-state">geen items gevonden</div>
+    }
+    else
+    {
+        <div class="item-grid">
+            @foreach (var item in items)
+            {
+                <div class="item-card">
+                    <div class="item-name">@item.name</div>
+                    <div class="item-desc">@item.description</div>
+
+                    @if (!string.IsNullOrEmpty(userName))
+                    {
+                        @if (feedbackMessages.ContainsKey(item.itemId))
+                        {
+                            <span class="feedback" style="color: @(feedbackMessages[item.itemId].success ? "#4ade80" : "#facc15");">
+                                @feedbackMessages[item.itemId].message
+                            </span>
+                        }
+                        else
+                        {
+                            <button class="btn-add" @onclick="() => AddToMyList(item.itemId)">
+                                + Voeg toe aan mijn lijst
+                            </button>
+                        }
+                    }
+                    else
+                    {
+                        <button class="btn-lock" @onclick="GoToLogin">
+                            🔒 Inloggen om toe te voegen
+                        </button>
+                    }
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private List<BucketListItem>? items;
+    private string userName = "";
+    private int userId;
+    private bool isLoaded = false;
+    private Dictionary<int, (string message, bool success)> feedbackMessages = new();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var userIdStr = await JS.InvokeAsync<string>("sessionStorage.getItem", "userId");
+            var storedName = await JS.InvokeAsync<string>("sessionStorage.getItem", "userName");
+
+            if (!string.IsNullOrEmpty(userIdStr))
+            {
+                userId = int.Parse(userIdStr);
+                userName = storedName ?? "";
+            }
+
+            isLoaded = true;
+            await LoadItems();
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadItems()
+    {
+        items = await Http.GetFromJsonAsync<List<BucketListItem>>("bucketlistitems");
+    }
+
+    private async Task AddToMyList(int itemId)
+    {
+        var response = await Http.PostAsync($"users/{userId}/bucketlist/{itemId}", null);
+
+        if (response.IsSuccessStatusCode)
+            feedbackMessages[itemId] = ("✅ toegevoegd!", true);
+        else if (response.StatusCode == System.Net.HttpStatusCode.Conflict)
+            feedbackMessages[itemId] = ("⚠️ staat al in jouw lijst", false);
+        else
+            feedbackMessages[itemId] = ("❌ fout bij toevoegen", false);
+
+        StateHasChanged();
+    }
+
+    private void GoToLogin() => Navigation.NavigateTo("/login");
+
+    private async Task Logout()
+    {
+        await JS.InvokeVoidAsync("sessionStorage.removeItem", "userId");
+        await JS.InvokeVoidAsync("sessionStorage.removeItem", "userName");
+        Navigation.NavigateTo("/login", forceLoad: true);
+    }
+
+    public class BucketListItem
+    {
+        public int itemId { get; set; }
+        public string name { get; set; } = string.Empty;
+        public string description { get; set; } = string.Empty;
+    }
+}
