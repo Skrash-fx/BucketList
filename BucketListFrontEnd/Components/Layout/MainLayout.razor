@@ -18,20 +18,19 @@
 
     <nav class="sidenav @(menuOpen ? "open" : "")">
         <div class="sidenav-header">
-            <span class="brand-icon">🪣</span>
             <span class="brand-name">BucketList</span>
             <button class="close-btn" @onclick="CloseMenu">✕</button>
         </div>
 
         <div class="sidenav-links">
             <a class="nav-link" href="/" @onclick="CloseMenu">
-                <span class="nav-icon">🏠</span> Home
+                 Home
             </a>
             <a class="nav-link" href="/mijnlijst" @onclick="CloseMenu">
-                <span class="nav-icon">📖</span> Mijn lijst
+                 Mijn lijst
             </a>
             <a class="nav-link" href="/login" @onclick="CloseMenu">
-                <span class="nav-icon">🗝️</span> Login
+                 Login
             </a>
         </div>
 
