@@ -89,16 +89,16 @@
 
 <div class="add-wrapper">
     <div class="page-title">➕ Nieuw item</div>
-    <div class="page-subtitle">voeg een item toe aan de globale lijst</div>
+    <div class="page-subtitle">voeg een item toe aan de algemene lijst en aan jou persoonlijke lijst</div>
 
     <div class="form-group">
         <label>Onderwerp</label>
-        <input type="text" placeholder="bv. Kilimanjaro beklimmen" @bind="nameBucketListItem" />
+        <input type="text" placeholder="bv.Dansen met matties" @bind="nameBucketListItem" />
     </div>
 
     <div class="form-group">
         <label>Beschrijving</label>
-        <input type="text" placeholder="een korte omschrijving..." @bind="descriptionBucketListItem" />
+        <input type="text" placeholder="een korte omschrijving" @bind="descriptionBucketListItem" />
     </div>
 
     <button class="btn-submit" @onclick="addItemToDB">
